@@ -5,7 +5,7 @@ export default function Home() {
     <div className="flex flex-col items-center justify-center py-10 text-center">
       {/* Decorative badge */}
       <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-[#00609c] ring-1 ring-sky-200">
-        Ala Centro • Estaca Curitiba
+        Ala Osasco • Estaca Osasco
       </span>
 
       <div className="mt-6 max-w-2xl space-y-4">

@@ -8,7 +8,7 @@ export default function MeetingsLayout({
           Reuniões Sacramentais
         </h2>
         <p className="mt-1 text-sm text-slate-500">
-          Consulte o histórico e próximas agendas da Ala Centro
+          Consulte o histórico e próximas agendas da Ala Osasco
         </p>
       </div>
       {children}
