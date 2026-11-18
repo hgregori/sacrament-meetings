@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import DeleteMeetingButton from './DeleteMeetingButton';
 import type { SacramentMeeting } from '@/lib/types';
 
 interface MeetingCardProps {
@@ -30,6 +31,10 @@ export default function MeetingCard({ meeting }: MeetingCardProps) {
       label: 'Conferência Geral',
       badgeClass: 'bg-indigo-50 text-indigo-900 border-indigo-200',
     },
+    special: {
+      label: 'Reunião Especial',
+      badgeClass: 'bg-emerald-50 text-emerald-900 border-emerald-200',
+    },
   };
 
   const currentType = typeConfig[meeting.meetingType] || {
@@ -46,10 +51,7 @@ export default function MeetingCard({ meeting }: MeetingCardProps) {
     .map((s) => s.name);
 
   return (
-    <Link
-      href={`/meetings/${meeting.id}`}
-      className="group relative flex flex-col sm:flex-row overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-sky-300 hover:shadow-md"
-    >
+    <div className="group relative flex flex-col sm:flex-row overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-sky-300 hover:shadow-md">
       {/* Date badge on left */}
       <div className="flex sm:w-32 flex-row sm:flex-col items-center justify-between sm:justify-center border-b sm:border-b-0 sm:border-r border-slate-100 bg-slate-50/70 p-4 text-center">
         <div>
@@ -74,14 +76,23 @@ export default function MeetingCard({ meeting }: MeetingCardProps) {
             >
               {currentType.label}
             </span>
-            <span className="text-xs font-semibold text-slate-400 group-hover:text-[#00609c] transition-colors">
-              Ata #{meeting.id} &rarr;
-            </span>
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/meetings/${meeting.id}/edit`}
+                className="text-xs font-medium text-slate-600 hover:text-[#00609c] hover:underline"
+              >
+                Editar
+              </Link>
+              <span className="text-slate-300">•</span>
+              <DeleteMeetingButton id={meeting.id} />
+            </div>
           </div>
 
-          <h3 className="mt-2 text-base font-bold text-slate-900 group-hover:text-[#00609c] transition-colors">
-            Presidida por {meeting.presiding}
-          </h3>
+          <Link href={`/meetings/${meeting.id}`} className="block mt-2">
+            <h3 className="text-base font-bold text-slate-900 group-hover:text-[#00609c] transition-colors">
+              Presidida por {meeting.presiding}
+            </h3>
+          </Link>
 
           <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600">
             <div>
@@ -109,12 +120,17 @@ export default function MeetingCard({ meeting }: MeetingCardProps) {
           )}
         </div>
 
-        {/* Bottom subtle accent bar */}
+        {/* Bottom actions */}
         <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs text-slate-500">
           <span>Hinos: #{meeting.openingHymn.number}, #{meeting.sacramentHymn.number}, #{meeting.closingHymn.number}</span>
-          <span className="font-medium text-[#00609c] group-hover:underline">Ver agenda completa</span>
+          <Link
+            href={`/meetings/${meeting.id}`}
+            className="font-medium text-[#00609c] hover:underline"
+          >
+            Ver ata completa &rarr;
+          </Link>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }

@@ -379,17 +379,116 @@ export async function getMeetingById(id: number): Promise<SacramentMeeting | nul
   return fallbackMeetings.find((m) => m.id === id) ?? null;
 }
 
-// Week 04 stubs for mutations (signatures preserved)
-/* eslint-disable @typescript-eslint/no-unused-vars */
-export async function addMeeting(_meeting: Omit<SacramentMeeting, 'id'>): Promise<SacramentMeeting> {
-  throw new Error('addMeeting will be implemented in Week 04');
+// Live mutations for Week 04
+export async function addMeeting(meeting: Omit<SacramentMeeting, 'id'>): Promise<SacramentMeeting> {
+  const databaseUrl = process.env.DATABASE_URL;
+
+  if (databaseUrl) {
+    const sql = neon(databaseUrl);
+    const rows = (await sql`
+      INSERT INTO meetings (
+        date,
+        meeting_type,
+        presiding,
+        conducting,
+        announcements,
+        opening_hymn,
+        opening_prayer,
+        ward_business,
+        stake_business,
+        sacrament_hymn,
+        speakers,
+        closing_hymn,
+        closing_prayer
+      ) VALUES (
+        ${meeting.date},
+        ${meeting.meetingType},
+        ${meeting.presiding},
+        ${meeting.conducting},
+        ${meeting.announcements ?? []},
+        ${JSON.stringify(meeting.openingHymn)},
+        ${meeting.openingPrayer},
+        ${JSON.stringify(meeting.wardBusiness ?? [])},
+        ${meeting.stakeBusiness ?? false},
+        ${JSON.stringify(meeting.sacramentHymn)},
+        ${JSON.stringify(meeting.speakers ?? [])},
+        ${JSON.stringify(meeting.closingHymn)},
+        ${meeting.closingPrayer}
+      )
+      RETURNING *
+    `) as DatabaseRow[];
+
+    return mapRowToMeeting(rows[0]);
+  }
+
+  // Fallback in-memory
+  const newId = fallbackMeetings.length > 0 ? Math.max(...fallbackMeetings.map((m) => m.id)) + 1 : 1;
+  const newMeeting: SacramentMeeting = {
+    ...meeting,
+    id: newId,
+  };
+  fallbackMeetings.unshift(newMeeting);
+  return newMeeting;
 }
 
-export async function updateMeeting(_id: number, _meeting: Partial<SacramentMeeting>): Promise<SacramentMeeting | null> {
-  throw new Error('updateMeeting will be implemented in Week 04');
+export async function updateMeeting(
+  id: number,
+  meeting: Partial<SacramentMeeting>
+): Promise<SacramentMeeting | null> {
+  const databaseUrl = process.env.DATABASE_URL;
+
+  if (databaseUrl) {
+    const existing = await getMeetingById(id);
+    if (!existing) return null;
+
+    const merged = { ...existing, ...meeting };
+    const sql = neon(databaseUrl);
+
+    const rows = (await sql`
+      UPDATE meetings
+      SET
+        date = ${merged.date},
+        meeting_type = ${merged.meetingType},
+        presiding = ${merged.presiding},
+        conducting = ${merged.conducting},
+        announcements = ${merged.announcements ?? []},
+        opening_hymn = ${JSON.stringify(merged.openingHymn)},
+        opening_prayer = ${merged.openingPrayer},
+        ward_business = ${JSON.stringify(merged.wardBusiness ?? [])},
+        stake_business = ${merged.stakeBusiness ?? false},
+        sacrament_hymn = ${JSON.stringify(merged.sacramentHymn)},
+        speakers = ${JSON.stringify(merged.speakers ?? [])},
+        closing_hymn = ${JSON.stringify(merged.closingHymn)},
+        closing_prayer = ${merged.closingPrayer}
+      WHERE id = ${id}
+      RETURNING *
+    `) as DatabaseRow[];
+
+    if (rows.length === 0) return null;
+    return mapRowToMeeting(rows[0]);
+  }
+
+  // Fallback in-memory
+  const index = fallbackMeetings.findIndex((m) => m.id === id);
+  if (index === -1) return null;
+  fallbackMeetings[index] = { ...fallbackMeetings[index], ...meeting };
+  return fallbackMeetings[index];
 }
 
-export async function deleteMeeting(_id: number): Promise<boolean> {
-  throw new Error('deleteMeeting will be implemented in Week 04');
+export async function deleteMeeting(id: number): Promise<boolean> {
+  const databaseUrl = process.env.DATABASE_URL;
+
+  if (databaseUrl) {
+    const sql = neon(databaseUrl);
+    const rows = await sql`
+      DELETE FROM meetings WHERE id = ${id} RETURNING id
+    `;
+    return rows.length > 0;
+  }
+
+  // Fallback in-memory
+  const index = fallbackMeetings.findIndex((m) => m.id === id);
+  if (index === -1) return false;
+  fallbackMeetings.splice(index, 1);
+  return true;
 }
-/* eslint-enable @typescript-eslint/no-unused-vars */

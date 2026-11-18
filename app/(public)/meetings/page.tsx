@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import Link from 'next/link';
 import MeetingCard from '@/components/MeetingCard';
 import MeetingSearch from '@/components/MeetingSearch';
 import Pagination from '@/components/Pagination';
@@ -22,14 +23,22 @@ export default async function MeetingsPage(
 
   return (
     <div className="space-y-6">
-      {/* Search Bar with Suspense because it uses useSearchParams */}
+      {/* Search Bar + Create New Meeting button */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <Suspense fallback={<div className="h-10 w-full max-w-md animate-pulse rounded-lg bg-slate-200" />}>
           <MeetingSearch />
         </Suspense>
-        <span className="text-xs font-medium text-slate-500">
-          {totalCount} {totalCount === 1 ? 'reunião encontrada' : 'reuniões encontradas'}
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-medium text-slate-500">
+            {totalCount} {totalCount === 1 ? 'reunião encontrada' : 'reuniões encontradas'}
+          </span>
+          <Link
+            href="/meetings/new"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-[#002b49] px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-[#00609c]"
+          >
+            <span>+</span> Nova Reunião
+          </Link>
+        </div>
       </div>
 
       {/* Meetings List */}
@@ -57,4 +66,3 @@ export default async function MeetingsPage(
     </div>
   );
 }
-
