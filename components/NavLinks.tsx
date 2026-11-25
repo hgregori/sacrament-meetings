@@ -3,14 +3,22 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-const links = [
-  { href: '/', label: 'Início' },
-  { href: '/meetings', label: 'Todas as Reuniões' },
-  { href: '/meetings/current', label: 'Este Domingo' },
-];
+interface NavLinksProps {
+  user?: {
+    name?: string | null;
+    email?: string | null;
+  } | null;
+  signOutSlot?: React.ReactNode;
+}
 
-export default function NavLinks() {
+export default function NavLinks({ user, signOutSlot }: NavLinksProps) {
   const pathname = usePathname();
+
+  const links = [
+    { href: '/', label: 'Início' },
+    { href: '/meetings', label: 'Todas as Reuniões' },
+    { href: '/meetings/current', label: 'Este Domingo' },
+  ];
 
   return (
     <nav aria-label="Navegação principal">
@@ -36,6 +44,29 @@ export default function NavLinks() {
             </li>
           );
         })}
+
+        {/* Display Login only if user is NOT logged in */}
+        {!user ? (
+          <li>
+            <Link
+              href="/login"
+              className={`inline-flex items-center rounded-md px-3.5 py-1.5 text-sm font-semibold transition-all duration-150 ${
+                pathname === '/login'
+                  ? 'bg-[#002b49] text-white shadow-sm ring-1 ring-[#002b49]'
+                  : 'text-[#00609c] hover:bg-sky-50'
+              }`}
+            >
+              Login
+            </Link>
+          </li>
+        ) : (
+          <li className="flex items-center gap-2 pl-1">
+            <span className="text-xs font-medium text-slate-500 hidden md:inline">
+              Olá, <strong className="text-slate-800">{user.name || 'Líder'}</strong>
+            </span>
+            {signOutSlot}
+          </li>
+        )}
       </ul>
     </nav>
   );

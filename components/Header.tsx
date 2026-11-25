@@ -2,7 +2,6 @@
 
 import { Suspense, useSyncExternalStore } from 'react';
 import Link from 'next/link';
-import NavLinks from './NavLinks';
 
 function subscribe() {
   return () => {};
@@ -21,7 +20,11 @@ function getServerDateSnapshot() {
   return '';
 }
 
-export default function Header() {
+interface HeaderProps {
+  navSlot?: React.ReactNode;
+}
+
+export default function Header({ navSlot }: HeaderProps) {
   const currentDate = useSyncExternalStore(
     subscribe,
     getFormattedDateSnapshot,
@@ -61,7 +64,7 @@ export default function Header() {
           </div>
         </div>
         <Suspense fallback={<div className="h-9 w-48" />}>
-          <NavLinks />
+          {navSlot}
         </Suspense>
       </div>
     </header>

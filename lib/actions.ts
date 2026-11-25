@@ -5,8 +5,10 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { addMeeting, updateMeeting as dbUpdateMeeting, deleteMeeting as dbDeleteMeeting } from './meetings-db';
 import type { MeetingType } from './types';
+import { signIn } from '@/auth';
+import { AuthError } from 'next-auth';
 
-export const MeetingFormSchema = z.object({
+const MeetingFormSchema = z.object({
   date: z.string().min(1, 'A data é obrigatória'),
   meetingType: z.enum(['testimony', 'regular', 'stake', 'general', 'special'], {
     error: 'Selecione um tipo de reunião válido',
@@ -261,5 +263,24 @@ export async function deleteMeeting(id: number): Promise<void> {
   } catch (error) {
     console.error('Failed to delete meeting in database:', error);
     throw new Error('Falha ao deletar a reunião.');
+  }
+}
+
+export async function authenticate(
+  _prevState: string | undefined,
+  formData: FormData,
+) {
+  try {
+    await signIn('credentials', formData);
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case 'CredentialsSignin':
+          return 'Email ou senha inválidos.';
+        default:
+          return 'Algo deu errado durante o login.';
+      }
+    }
+    throw error;
   }
 }
