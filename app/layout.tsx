@@ -16,8 +16,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Sacrament Meeting Planner',
-  description: 'Plan and view sacrament meeting agendas for the ward.',
+  title: {
+    default:  'Sacrament Meeting Planner',
+    template: '%s | Sacrament Meeting Planner',
+  },
+  description:
+    'A portfolio of web development projects.',
+  metadataBase: new URL('https://your-portfolio-url.vercel.app'),
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {

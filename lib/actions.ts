@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { addMeeting, updateMeeting as dbUpdateMeeting, deleteMeeting as dbDeleteMeeting } from './meetings-db';
 import type { MeetingType } from './types';
-import { signIn } from '@/auth';
+import { auth, signIn } from '@/auth';
 import { AuthError } from 'next-auth';
 
 const MeetingFormSchema = z.object({
@@ -58,6 +58,13 @@ export type State = {
 };
 
 export async function createMeeting(_prevState: State, formData: FormData): Promise<State> {
+  const session = await auth();
+  if (!session?.user) {
+    return {
+      message: 'Não autorizado. Faça login para criar reuniões.',
+    };
+  }
+
   const rawData = {
     date: formData.get('date'),
     meetingType: formData.get('meetingType'),
@@ -156,6 +163,13 @@ export async function updateMeeting(
   _prevState: State,
   formData: FormData
 ): Promise<State> {
+  const session = await auth();
+  if (!session?.user) {
+    return {
+      message: 'Não autorizado. Faça login para atualizar reuniões.',
+    };
+  }
+
   const rawData = {
     date: formData.get('date'),
     meetingType: formData.get('meetingType'),
@@ -257,6 +271,11 @@ export async function updateMeeting(
 }
 
 export async function deleteMeeting(id: number): Promise<void> {
+  const session = await auth();
+  if (!session?.user) {
+    redirect('/login');
+  }
+
   try {
     await dbDeleteMeeting(id);
     revalidatePath('/meetings');

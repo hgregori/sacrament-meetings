@@ -1,5 +1,6 @@
 import { getMeetings } from '@/lib/meetings-db';
 import { NextRequest } from 'next/server';
+import type { Metadata } from 'next';
 
 export async function GET(request: NextRequest) {
   const date = request.nextUrl.searchParams.get('date');
